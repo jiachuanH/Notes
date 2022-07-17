@@ -3,7 +3,7 @@ Mainly about JAVA and big data study notes
 
 
 
-<head><link rel="stylesheet" type="text/css" href="css/github.css" /></head>
+<div><link rel="stylesheet" type="text/css" href="css/github.css" /></div>
 
 
 
@@ -12,3 +12,4 @@ Mainly about JAVA and big data study notes
 > 
 
 ==我是红色==
+
