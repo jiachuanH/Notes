@@ -17,8 +17,7 @@ Mainly about JAVA and big data study notes
 
 
 ## Contributing
-
 <a href="https://github.com/jiachuanH/Notes/graphs/contributors">
-  <img src="../image/Notes.svg+xml" />
+  <img src="https://contrib.rocks/image?repo=jiachuanH/Notes" />
 </a>
 
