@@ -7,7 +7,7 @@ Mainly about JAVA and big data study notes
 
 
 <p>
-  <a href="https://img.shields.io/github/license/jiachuanH/Notes.git">
+  <a href="https://github.com/jiachuanH/Notes/blob/main/LICENSE">
     <img src="https://img.shields.io/github/license/jiachuanH/Notes.git" alt="license" />
   </a>
 </p>
@@ -30,4 +30,11 @@ Mainly about JAVA and big data study notes
 <a href="https://github.com/jiachuanH/Notes/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=jiachuanH/Notes" />
 </a>
+
+
+
+
+
+
+
 
