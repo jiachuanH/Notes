@@ -934,6 +934,49 @@ $ git push -u origin master
 
 
 
+# 七、日常使用问题
+
+## 远程连接未修改
+
+> 背景：
+>
+> - 情景一：如果 clone 下来一个别人的仓库，在此基础上完成你的代码，推送到自己的仓库
+> - 情景二：原先的仓库已完工  要为一个新仓库贡献代码
+> - 错误提示：
+>   error: remote origin already exists.表示远程仓库已存在
+
+**需要进行以下操作**
+
+- 先删除关联的origin的远程库
+
+  ```sh
+  $git remote rm origin
+  ```
+
+- 关联待贡献的远程仓库 
+
+  ```sh
+  $git remote add origin 远程链接
+  ```
+
+- 最后推送仓库
+
+  ```sh
+  $git push origin mai
+  ```
+
+  
+
+
+
+
+
+
+
+
+
+
+
 
 
 
