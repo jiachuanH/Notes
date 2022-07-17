@@ -1,0 +1,9 @@
+YarnCoarseGrainedExecutorBackend
+
+	-- main
+	
+		-- CoarseGrainedExecutorBackend.run
+		
+			-- val env = SparkEnv.createExecutorEnv
+			
+			-- env.rpcEnv.setupEndpoint("Executor")

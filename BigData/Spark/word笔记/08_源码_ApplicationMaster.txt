@@ -1,0 +1,49 @@
+ApplicationMaster
+
+	-- main
+	
+		// --class => userClass => SparkPi(WordCount)
+		-- new ApplicationMasterArguments
+		
+		-- master = new ApplicationMaster
+		
+		-- master.run()
+		
+		-- 【Client 】runExecutorLauncher
+		-- 【Cluster】runDriver
+		
+			-- userClassThread = startUserApplication()
+			
+				-- ClassLoader.loadClass(args.userClass)
+					getMethod("main")
+					
+				-- new Thread().start()
+				
+					-- run
+						-- mainMethod.invoke(null, userArgs.toArray)
+						
+							-- WordCount
+							
+								-- new SparkContext() // 创建Spark的环境
+								-- 【blocking....................】
+			
+			// Blocking -----------------------------------------
+			-- val sc = ThreadUtils.awaitResult
+			
+			// 注册
+			-- registerAM
+			
+			// 资源分配
+			-- createAllocator
+			
+				-- allocator.allocateResources
+				
+					-- handleAllocatedContainers
+					
+						-- runAllocatedContainers
+						
+							// bin/java org.apache.spark.executor.YarnCoarseGrainedExecutorBackend
+							-- prepareCommand
+			
+			-- resumeDriver // 执行Spark作业
+			-- userClassThread.join()

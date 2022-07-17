@@ -1,0 +1,49 @@
+SparkSubmit
+
+	-- main
+	
+		-- doSubmit
+		
+			// 解析参数
+			-- parseArguments
+			
+				// master => --master => yarn
+				// mainClass => --class => SparkPi(WordCount)
+				-- parse
+				
+			-- submit
+			
+				-- doRunMain
+				
+				-- runMain
+				
+					// (childArgs, childClasspath, sparkConf, childMainClass)
+					// 【Cluster】childMainClass => org.apache.spark.deploy.yarn.YarnClusterApplication
+					// 【Client 】childMainClass => SparkPi(WordCount)
+					-- prepareSubmitEnvironment
+					
+					// Class.forName("xxxxxxx")
+					-- mainClass : Class = Utils.classForName(childMainClass)
+					
+					// classOf[SparkApplication].isAssignableFrom(mainClass)
+					-- 【Cluster】a). mainClass.getConstructor().newInstance().asInstanceOf[SparkApplication]
+					-- 【Client 】b). new JavaMainApplication(mainClass)
+					
+					-- app.start
+					
+YarnClusterApplication
+
+	-- start
+	
+		// new ClientArguments
+		// --class => userClass => SparkPI(WordCount)
+		-- new Client
+		
+		-- client.run
+		
+			-- submitApplication
+			
+				// 【Cluster】 org.apache.spark.deploy.yarn.ApplicationMaster
+				// 【Client 】 org.apache.spark.deploy.yarn.ExecutorLauncher
+				--createContainerLaunchContext
+				--createApplicationSubmissionContext
