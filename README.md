@@ -30,10 +30,11 @@
 # Contents
 
 
+
 <details>
 	<summary>BigData
 	</summary>
-	<ul><li><a href="BigData\Linux笔记.pdf">Linux</a></li></ul>
+	<ul><li><a href="BigData\Linux笔记.pdf">LinuxPDF下载后查看</a></li></ul>
 	<ul><li>Hadoop</li>
 		<ul><li><a href="BigData\Hadoop\0入门\Hadoop入门.md">入门</a></li></ul>
 		<ul><li><a href="BigData\Hadoop\1HDFS\HDFS.md">HDFS</a></li></ul>
@@ -43,11 +44,11 @@
 	</ul>
     <ul><li><a href="BigData\Zookeeper\1 、Zookeeper基础\Zookeeper.md">Zookeeper</a></li></ul>
     <ul><li><a href="BigData\Hive\1Hive基础\HIve.md">Hive</a></li></ul>
-    <ul><li><a href="">Flume</a></li></ul>
+    <ul><li><a href="">Flume丢失</a></li></ul>
     <ul><li><a href="BigData\kafka\Kafka.md">Kafka</a></li></ul>
     <ul><li><a href="BigData\Hbase\1、Hbase基础\Hbase.md">Hbase</a></li></ul>
-    <ul><li><a href="">Sqoop</a></li></ul>
-    <ul><li><a href="">Azkaban</a></li></ul>
+    <ul><li><a href="">Sqoop未学</a></li></ul>
+    <ul><li><a href="">Azkaban丢失</a></li></ul>
     <ul><li><a href="BigData\Maxwell\1、Maxwell\Maxwell.md">Maxwell</a></li></ul>
     <ul><li><a href="BigData\Canal\1、Canal\Canal.md">Canal</a></li></ul>
     <ul><li>Scala</li>
@@ -65,7 +66,7 @@
     	<ul><li><a href="BigData\Spark\1、SparkNote\2、SparkSQL.md">2、SparkSQL</a></li></ul>
     	<ul><li><a href="BigData\Spark\1、SparkNote\3、SparkSteaming.md">3、SparkSteaming</a></li></ul>
     </ul>
-    <ul><li><a href="">Flink</a></li></ul>
+    <ul><li><a href="">Flink未学</a></li></ul>
     <ul><li><a href="BigData\电商数仓5.0\1、E-com\E-com.md">E-commerce5.0</a></li></ul>
 </details>
 
