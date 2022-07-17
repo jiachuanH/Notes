@@ -27,9 +27,8 @@ Mainly about JAVA and big data study notes
 
 # :notebook_with_decorative_cover:  Contents
 
-
 <details>
-	<summary>BigData
+	<summary><strong>BigData</strong>
 	</summary>
 	<ul><li><a href="BigData\Linux笔记.pdf">LinuxPDF下载后查看</a></li></ul>
 	<ul><li>Hadoop</li>
@@ -93,6 +92,5 @@ Mainly about JAVA and big data study notes
     <img src="https://skillicons.dev/icons?i=github" />
   </a>
 </p>
-
 
 
