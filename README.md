@@ -6,6 +6,16 @@ Mainly about JAVA and big data study notes
 
 
 
+<p>
+  <a href="https://img.shields.io/github/license/jiachuanH/Notes.git">
+    <img src="https://img.shields.io/github/license/jiachuanH/Notes.git" alt="license" />
+  </a>
+</p>
+
+
+
+
+
  <details>
 <summary>BigData</summary>
   <ul>
