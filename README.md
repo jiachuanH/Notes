@@ -4,7 +4,7 @@
 
 Mainly about JAVA and big data study notes
 
-
+<div align="center">
 
 <p>
   <a href="https://github.com/jiachuanH/Notes/blob/main/LICENSE">
@@ -21,6 +21,8 @@ Mainly about JAVA and big data study notes
   </a>
 </p>
 
+</div>
+
 
 
  <details>
@@ -35,7 +37,6 @@ Mainly about JAVA and big data study notes
 <a href="https://github.com/jiachuanH/Notes/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=jiachuanH/Notes" />
 </a>
-
 
 
 
