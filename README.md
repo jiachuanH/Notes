@@ -23,10 +23,9 @@ Mainly about JAVA and big data study notes
     <img src="https://img.shields.io/github/stars/jiachuanH/Notes" alt="stars" />
   </a>
 </p>
-
 </div>
 
-# Contents
+# :notebook_with_decorative_cover:  Contents
 
 
 <details>
@@ -74,10 +73,26 @@ Mainly about JAVA and big data study notes
 
 
 
-## Contributing
+## :wave: Contributing
+
 <a href="https://github.com/jiachuanH/Notes/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=jiachuanH/Notes" />
 </a>
+
+
+
+
+
+## :handshake: Contact
+
+<p > 
+ <a href="https://twitter.com/Jiachuanhuang">
+    <img src="https://skillicons.dev/icons?i=twitter" />
+  </a>
+ <a href="https://github.com/jiachuanH">
+    <img src="https://skillicons.dev/icons?i=github" />
+  </a>
+</p>
 
 
 
