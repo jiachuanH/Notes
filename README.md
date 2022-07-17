@@ -1,9 +1,12 @@
 
 
+<div align="center">
+
 # Notes
 
-<div align="center">
+
 Mainly about JAVA and big data study notes
+
 
 
 ​    
@@ -23,7 +26,7 @@ Mainly about JAVA and big data study notes
     <img src="https://img.shields.io/github/stars/jiachuanH/Notes" alt="stars" />
   </a>
 </p>
-</div>
+</div></br>
 
 # :notebook_with_decorative_cover:  Contents
 
