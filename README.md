@@ -31,6 +31,16 @@ Mainly about JAVA and big data study notes
 </br>
 
 <details>
+    <summary><strong>前置知识</strong></summary>
+    <ul><li><a href="prerequisite\GitStudy\Git\GitStudy.md">Git</a></li></ul>
+    <ul><li><a href="prerequisite\LinuxStudy\Linux\Linux.md">Linux笔记</a></li></ul>
+    <ul><li><a href="https://wangchujiang.com/linux-command/">Linux命令查询</a></li></ul>
+    <ul><li>Mysql</li>
+        <ul><li><a href="prerequisite\MysqlStudy\Mysql\SQL 语法.md">Mysql基础</a></li></ul>
+        <ul><li><a href="prerequisite\MysqlStudy\Mysql\MySQL.md">Mysql高阶</a></li></ul>
+    </ul>
+</details>
+<details>
 	<summary><strong>BigData</strong>
 	</summary>
 	<ul><li><a href="BigData\Linux笔记.pdf">LinuxPDF下载后查看</a></li></ul>
@@ -68,6 +78,15 @@ Mainly about JAVA and big data study notes
     <ul><li><a href="">Flink未学</a></li></ul>
     <ul><li><a href="BigData\电商数仓5.0\1、E-com\E-com.md">E-commerce5.0</a></li></ul>
 </details>
+<details>
+    <summary><strong>Java</strong></summary>
+    <p style="color: red;" align="center">以下笔记均为PDF文档由B站UP主<a href="https://space.bilibili.com/95256449?spm_id_from=333.337.search-card.all.click">狂神说</a>所有 </p>
+    <ul><li><a href="Java\">点我至目录页</a></li></ul>
+</details>
+
+
+
+
 
 </br></br>
 
@@ -86,7 +105,7 @@ Mainly about JAVA and big data study notes
 
 
 
-
+</br></br>
 
 ## :handshake: Contact
 
