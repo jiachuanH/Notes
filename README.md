@@ -43,6 +43,7 @@ Mainly about JAVA and big data study notes
 <details>
 	<summary><strong>BigData</strong>
 	</summary>
+    <ul><li><a href="BigData\大数据常用脚本\脚本汇总.md">常用脚本</a></li></ul>
 	<ul><li><a href="BigData\Linux笔记.pdf">LinuxPDF下载后查看</a></li></ul>
 	<ul><li>Hadoop</li>
 		<ul><li><a href="BigData\Hadoop\0入门\Hadoop入门.md">入门</a></li></ul>
@@ -88,6 +89,7 @@ Mainly about JAVA and big data study notes
 
 
 
+
 </br></br>
 
 
@@ -117,5 +119,3 @@ Mainly about JAVA and big data study notes
     <img src="https://skillicons.dev/icons?i=github" />
   </a>
 </p>
-
-
