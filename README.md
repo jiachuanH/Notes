@@ -32,10 +32,18 @@ Mainly about JAVA and big data study notes
 
 <details>
     <summary><strong>前置知识</strong></summary>
-    <ul><li><a href="prerequisite\GitStudy\Git\GitStudy.md">Git</a></li></ul>
+    <ul><li>Markdown</li>
+    <ul><li><a href="prerequisite\MarkdownStudy\Markdown\markdownStudy.md">Markdown语法</a></li></ul>
+    <ul><li><a href="prerequisite\MarkdownStudy\Markdown\makedown数学公式.md">Markdown数学公式</a></li></ul>
+    </ul>
+    <ul><li>Git</li>
+    <ul><li><a href="prerequisite\GitStudy\Git\GitStudy.md">Git笔记</a></li></ul>
     <ul><li><a href="prerequisite\GitStudy\Git\git-cheat-sheet.pdf">Git-Cheat-Sheet</a></li></ul>
+    </ul>
+    <ul><li>Linux</li>
     <ul><li><a href="prerequisite\LinuxStudy\Linux\Linux.md">Linux笔记</a></li></ul>
     <ul><li><a href="https://wangchujiang.com/linux-command/">Linux命令查询</a></li></ul>
+    </ul>
     <ul><li>Mysql</li>
         <ul><li><a href="prerequisite\MysqlStudy\Mysql\SQL 语法.md">Mysql基础</a></li></ul>
         <ul><li><a href="prerequisite\MysqlStudy\Mysql\MySQL.md">Mysql高阶</a></li></ul>
@@ -92,6 +100,7 @@ Mainly about JAVA and big data study notes
 
 
 
+
 </br></br>
 
 
@@ -121,4 +130,3 @@ Mainly about JAVA and big data study notes
     <img src="https://skillicons.dev/icons?i=github" />
   </a>
 </p>
-1
