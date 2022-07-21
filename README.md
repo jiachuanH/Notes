@@ -34,7 +34,7 @@ Mainly about JAVA and big data study notes
     <summary><strong>前置知识</strong></summary>
     <ul><li>Markdown</li>
     <ul><li><a href="prerequisite\MarkdownStudy\Markdown\markdownStudy.md">Markdown语法</a></li></ul>
-    <ul><li><a href="prerequisite\MarkdownStudy\Markdown\makedown数学公式.md">Markdown数学公式</a></li></ul>
+    <ul><li><a href="prerequisite\MarkdownStudy\Markdown\markdown数学公式.md">Markdown数学公式</a></li></ul>
     </ul>
     <ul><li>Git</li>
     <ul><li><a href="prerequisite\GitStudy\Git\GitStudy.md">Git笔记</a></li></ul>
@@ -93,6 +93,7 @@ Mainly about JAVA and big data study notes
     <p style="color: red;" align="center">以下笔记均为PDF文档由B站UP主<a href="https://space.bilibili.com/95256449?spm_id_from=333.337.search-card.all.click">狂神说</a>所有 </p>
     <ul><li><a href="Java\">点我至目录页</a></li></ul>
 </details>
+
 
 
 
