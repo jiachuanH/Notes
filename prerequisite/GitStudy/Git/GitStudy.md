@@ -962,7 +962,7 @@ $ git push -u origin master
 - 最后推送仓库
 
   ```sh
-  $git push origin mai
+  $git push -u origin main
   ```
 
   
