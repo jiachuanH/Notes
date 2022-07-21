@@ -33,6 +33,7 @@ Mainly about JAVA and big data study notes
 <details>
     <summary><strong>前置知识</strong></summary>
     <ul><li><a href="prerequisite\GitStudy\Git\GitStudy.md">Git</a></li></ul>
+    <ul><li><a href="prerequisite\GitStudy\Git\git-cheat-sheet.pdf">Git-Cheat-Sheet</a></li></ul>
     <ul><li><a href="prerequisite\LinuxStudy\Linux\Linux.md">Linux笔记</a></li></ul>
     <ul><li><a href="https://wangchujiang.com/linux-command/">Linux命令查询</a></li></ul>
     <ul><li>Mysql</li>
@@ -84,6 +85,7 @@ Mainly about JAVA and big data study notes
     <p style="color: red;" align="center">以下笔记均为PDF文档由B站UP主<a href="https://space.bilibili.com/95256449?spm_id_from=333.337.search-card.all.click">狂神说</a>所有 </p>
     <ul><li><a href="Java\">点我至目录页</a></li></ul>
 </details>
+
 
 
 
