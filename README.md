@@ -69,6 +69,7 @@ Mainly about JAVA and big data study notes
     <ul><li><a href="">Sqoop未学</a></li></ul>
     <ul><li><a href="">Azkaban丢失</a></li></ul>
     <ul><li><a href="BigData\Maxwell\1、Maxwell\Maxwell.md">Maxwell</a></li></ul>
+    <ul><li><a href="BigData\DataX\1、DataX\DataX.md">DataX</a></li></ul>
     <ul><li><a href="BigData\Canal\1、Canal\Canal.md">Canal</a></li></ul>
     <ul><li>Scala</li>
     	<ul><li><a href="BigData\Scala\1、Scala\一、Scale简介及配置.md">一、Scale简介及配置</a></li></ul>
@@ -96,19 +97,7 @@ Mainly about JAVA and big data study notes
 
 
 
-
-
-
-
-
-
 </br></br>
-
-
-
-
-
-
 
 
 ## :wave: Contributing

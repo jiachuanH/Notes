@@ -153,7 +153,7 @@
 
     
 
-## 使用
+## 使用概述
 
 ### 任务提交命令
 
@@ -487,6 +487,46 @@ $ python bin/datax.py -r mysqlreader -w hdfswriter
 
 
 
+#### 提交任务
+
+------
+
+> DataX向HDFS同步数据时，需确保目标路径已存在
+
+1. 在HDFS创建目录
+
+   ```sh
+   $ hadoop fs -mkdir /base_province
+   ```
+
+2. 进入DataX目录
+
+   ```sh
+   $ cd /opt/module/datax 
+   ```
+
+3. 执行命令
+
+   ```sh
+   $ python bin/datax.py job/base_province.json 
+   ```
+
+4. 查看结果
+
+   1. 控制台终端
+
+   2. HDFS
+
+      ```sh
+      $ hadoop fs -cat /base_province/* | zcat
+      ```
+
+
+
+
+
+
+
 
 
 ### Mysql ——QuerySQLMode
@@ -567,6 +607,10 @@ $ python bin/datax.py -r mysqlreader -w hdfswriter
 
 ```
 
+[^speed：channel]: 并发度
+
+
+
 
 
 #### 参数说明👇
@@ -591,8 +635,426 @@ $ python bin/datax.py -r mysqlreader -w hdfswriter
         ]
     }
 }
+```
+
+
+
+
+
+#### 提交任务
+
+------
+
+1. 清空历史数据
+
+   ```sh
+   $ hadoop fs -rm -r -f /base_province/*
+   ```
+
+2. 进入DataX
+
+   ```sh
+   $ cd /opt/module/datax 
+   ```
+
+3. 执行命令
+
+   ```sh
+   datax]$ python bin/datax.py job/base_province.json
+   ```
+
+4. 查看结果
+
+   1. 终端
+
+   2. HDFS
+
+      ```sh
+      $ hadoop fs -cat /base_province/* | zcat
+      ```
+
+
+
+#### DataX传参
+
+------
+
+> 为了对每日同步的数据加以区分  因此DataX配置文件中HDFS Writer的path参数的值是动态
+
+==不是说只有path可以传参，json文件的任何配置都可以==
+
+##### 详细配置
+
+------
+
+```sh
+{
+    "job": {
+        "content": [
+            {
+                "reader": {
+                    "name": "mysqlreader",
+                    "parameter": {
+                        "connection": [
+                            {
+                                "jdbcUrl": [
+                                    "jdbc:mysql://hadoop102:3306/gmall"
+                                ],
+                                "querySql": [
+                                    "select id,name,region_id,area_code,iso_code,iso_3166_2 from base_province where id>=3"
+                                ]
+                            }
+                        ],
+                        "password": "123456",
+                        "username": "root"
+                    }
+                },
+                "writer": {
+                    "name": "hdfswriter",
+                    "parameter": {
+                        "column": [
+                            {
+                                "name": "id",
+                                "type": "bigint"
+                            },
+                            {
+                                "name": "name",
+                                "type": "string"
+                            },
+                            {
+                                "name": "region_id",
+                                "type": "string"
+                            },
+                            {
+                                "name": "area_code",
+                                "type": "string"
+                            },
+                            {
+                                "name": "iso_code",
+                                "type": "string"
+                            },
+                            {
+                                "name": "iso_3166_2",
+                                "type": "string"
+                            }
+                        ],
+                        "compress": "gzip",
+                        "defaultFS": "hdfs://hadoop102:8020",
+                        "fieldDelimiter": "\t",
+                        "fileName": "base_province",
+                        "fileType": "text",
+                        "path": "/base_province/${dt}",
+                        "writeMode": "append"
+                    }
+                }
+            }
+        ],
+        "setting": {
+            "speed": {
+                "channel": 1
+            }
+        }
+    }
+}
 
 ```
+
+==注意：56行的path==
+
+##### 提交任务
+
+------
+
+- 创建目标路径
+
+  ```sh
+  $ hadoop fs -mkdir /base_province/2020-06-14
+  ```
+
+- 进入DataX根目录
+
+  ```sh
+  $ cd /opt/module/datax
+  ```
+
+- 执行命令
+
+  ```sh
+  $ python bin/datax.py -p -Ddt=2020-06-14 job/base_province.json
+  ```
+
+- 查看结果
+
+   - 终端
+
+   - HDFS
+
+      ```sh
+      $ hadoop fs -cat /base_province/* | zcat
+      ```
+
+
+
+
+
+## HDFS  ⏩     Mysql
+
+> 同步HDFS上的/base_province目录下的数据到MySQL gmall 数据库下的test_province表
+>
+
+**流程**
+
+- 选择适合的Reader  和  Writer
+- 编写json文件
+- 提交任务
+
+### 详细配置
+
+------
+
+```sh
+{
+    "job": {
+        "content": [
+            {
+                "reader": {
+                    "name": "hdfsreader",
+                    "parameter": {
+                        "defaultFS": "hdfs://hadoop102:8020",
+                        "path": "/base_province",
+                        "column": [
+                            "*"
+                        ],
+                        "fileType": "text",
+                        "compress": "gzip",
+                        "encoding": "UTF-8",
+                        "nullFormat": "\\N",
+                        "fieldDelimiter": "\t",
+                    }
+                },
+                "writer": {
+                    "name": "mysqlwriter",
+                    "parameter": {
+                        "username": "root",
+                        "password": "123456",
+                        "connection": [
+                            {
+                                "table": [
+                                    "test_province"
+                                ],
+                                "jdbcUrl": "jdbc:mysql://hadoop102:3306/gmall?useUnicode=true&characterEncoding=utf-8"
+                            }
+                        ],
+                        "column": [
+                            "id",
+                            "name",
+                            "region_id",
+                            "area_code",
+                            "iso_code",
+                            "iso_3166_2"
+                        ],
+                        "writeMode": "replace"
+                    }
+                }
+            }
+        ],
+        "setting": {
+            "speed": {
+                "channel": 1
+            }
+        }
+    }
+}
+
+```
+
+### 参数说明
+
+------
+
+**Reader**
+
+```json
+{
+    "name": "hdfsreader",			//Reader名称，固定写法
+    "parameter": {
+        "defaultFS": "hdfs://hadoop102:8020",		//HDFS文件系统namenode地址
+        "path": "/base_province",					//文件所在路径
+        "column": [							  //需要同步的列，可使用索引选择所需列，例如[{ “index”: 0, 													   “type”: “long” }, { “index”: 1, “type”: “boolean” }]标												识前两列，[“*”]标识所有列。
+            "*"
+        ],
+        "fileType": "text",   				//文件类型，目前支持textfile(text)、orcfile(orc)、rcfile(rc)、												sequence file(seq)和csv文件(csv)
+        "compress": "gzip",					//压缩类型，目前支持gzip、bz2、zip、lzo、lzo_deflate、snappy等
+        "encoding": "UTF-8",				//文件编码
+        "nullFormat": "\\N",				//null值存储格式
+        "fieldDelimiter": "\t"				//字段分割符
+    }
+}
+
+```
+
+**Writer**
+
+```json
+{	
+    "name": "mysqlwriter",						//Writer名称，固定写法
+    "parameter": {
+        "username": "root",						//数据库用户名
+        "password": “123456",					//数据库密码
+        "connection": [
+            {
+                "table": [						//目标表
+                    "test_province"
+                ],
+                "jdbcUrl": "jdbc:mysql://hadoop102:3306/gmall?			//JDBC URL
+                  useUnicode=true&characterEncoding=utf-8"
+            }
+        ],
+        "column": ["id","name", "region_id", "area_code", "iso_code", "iso_3166_2"],  //目标列
+        "writeMode": "replace"							//写入方式：控制写入数据到目标表采用 insert 																into(insert) 或者 replace into(replace) 或者 ON 														DUPLICATE KEY UPDATE (update)语句 
+    }
+}
+```
+
+**写入模式writer Mode介绍**
+
+| writer Mode             |                                 |      |
+| ----------------------- | ------------------------------- | ---- |
+| insert into             | 不断往里面插入数据              |      |
+| replace into            | 有重复数据时 将原来的数据取代掉 |      |
+| ON DUPLICATE KEY UPDATE | 有重复数据时 将原来的数据更新   |      |
+
+
+
+### 提交任务
+
+------
+
+- 在MySQL中创建gmall.test_province表
+
+  ```mysql
+  DROP TABLE IF EXISTS `test_province`;
+  CREATE TABLE `test_province`  (
+    `id` bigint(20) NOT NULL,
+    `name` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+    `region_id` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+    `area_code` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+    `iso_code` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+    `iso_3166_2` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+    PRIMARY KEY (`id`)
+  ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+  
+  ```
+
+- 进入DataX根目录
+
+- 执行 命令
+
+  ```sh
+  $ python bin/datax.py job/test_province.json 
+  ```
+
+- 查看结果
+
+  - 终端
+
+  - Navicat查看目标表数据
+
+    
+
+
+
+# 三、DataX优化
+
+## 速度控制
+
+> DataX3.0提供了包括通道(并发)、记录流、字节流三种流控模式——随意控制你的作业速度
+
+
+
+| **参数**                                | **说明**                                            |
+| --------------------------------------- | --------------------------------------------------- |
+| **job.setting.speed.channel**           | 总并发数                                            |
+| **job.setting.speed.record**            | 总record限速                                        |
+| **job.setting.speed.byte**              | 总byte限速                                          |
+| **core.transport.channel.speed.record** | 单个channel的record限速，默认值为10000（10000条/s） |
+| **core.transport.channel.speed.byte**   | 单个channel的byte限速，默认值1024*1024（1M/s）      |
+
+
+
+**注意事项：**
+
+- 若配置了总record限速
+  - 则必须配置单个channel的record限速
+- 若配置了总byte限速
+  - 则必须配置单个channe的byte限速
+- 若配置了总record限速和总byte限速
+  - channel并发数参数就会失效。因为配置了总record限速和总byte限速之后，实际channel并发数是通过计算得到的：
+
+**计算公式**
+$$
+min(总byte限速/单个channle的byte限速，总record限速/单个channel的record限速)
+$$
+**样例**
+
+```json
+{
+    "core": {
+        "transport": {
+            "channel": {
+                "speed": {
+                    "byte": 1048576 //单个channel byte限速1M/s
+                }
+            }
+        }
+    },
+    "job": {
+        "setting": {
+            "speed": {
+                "byte" : 5242880 //总byte限速5M/s
+            }
+        },
+        ...
+    }
+}
+
+```
+
+
+
+## 内存调整
+
+> 提升DataX Job内Channel并发数时，内存的占用会显著增加，因为DataX作为数据交换通道，在内存中会缓存较多的数据
+
+[^例子]: Channel中会有一个Buffer，作为临时的数据交换的缓冲区，而在部分Reader和Writer的中，也会存在一些Buffer，为了防止OOM等错误，需调大JVM的堆内存
+
+
+
+**调整方式**
+
+- 直接更改datax.py脚本
+
+  - 找到`--jvm`参数
+
+  - ```python
+     		👇最小值
+    --jvm="-Xms8G -Xmx8G"
+    				👆最大值
+    ```
+  
+  
+
+- 在启动的时候，加上对应的参数
+
+  ```sh
+  python datax/bin/datax.py --jvm="-Xms8G -Xmx8G" /path/to/your/job.json
+  ```
+
+  
+
+==建议将内存设置为4G或者8G==
+
+
 
 
 

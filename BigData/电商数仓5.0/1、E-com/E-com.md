@@ -1444,6 +1444,247 @@ esac
 
 
 
+### 应用安装部署
+
+------
+
+#### Hive
+
+> **apache-hive-3.1.2-bin.tar.gz**
+
+##### 安装
+
+------
+
+
+
+- 上传	解压	改名
+
+- 配置环境变量  并 source
+
+- 解决JAR包冲突
+
+  ```sh
+  #进入/opt/module/hive/lib
+  $ mv log4j-slf4j-impl-2.10.0.jar log4j-slf4j-impl-2.10.0.jar.bak
+  ```
+
+  
+
+##### 配置
+
+------
+
+**Hive元数据配置到MySQL**
+
+- 拷贝驱动
+
+  ```sh
+  $ cp /opt/software/mysql-connector-java-5.1.27.jar /opt/module/hive/lib/
+  ```
+
+- 配置MySQL作为元数据存储
+
+  - 在hive的lib下新建	`hive-site.xml`  写入以下内容
+
+  - ```xml
+    <?xml version="1.0"?>
+    <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+    <configuration>
+        <property>
+            <name>javax.jdo.option.ConnectionURL</name>
+            <value>jdbc:mysql://hadoop102:3306/metastore?useSSL=false</value>
+        </property>
+    
+        <property>
+            <name>javax.jdo.option.ConnectionDriverName</name>
+            <value>com.mysql.jdbc.Driver</value>
+        </property>
+    
+        <property>
+            <name>javax.jdo.option.ConnectionUserName</name>
+            <value>root</value>
+        </property>
+    
+        <property>
+            <name>javax.jdo.option.ConnectionPassword</name>
+            <value>123456</value>
+        </property>
+    
+        <property>
+            <name>hive.metastore.warehouse.dir</name>
+            <value>/user/hive/warehouse</value>
+        </property>
+    
+        <property>
+            <name>hive.metastore.schema.verification</name>
+            <value>false</value>
+        </property>
+    
+        <property>
+        <name>hive.server2.thrift.port</name>
+        <value>10000</value>
+        </property>
+    
+        <property>
+            <name>hive.server2.thrift.bind.host</name>
+            <value>hadoop102</value>
+        </property>
+    
+        <property>
+            <name>hive.metastore.event.db.notification.api.auth</name>
+            <value>false</value>
+        </property>
+        
+        <property>
+            <name>hive.cli.print.header</name>
+            <value>true</value>
+        </property>
+    
+        <property>
+            <name>hive.cli.print.current.db</name>
+            <value>true</value>
+        </property>
+    </configuration>
+    
+    ```
+
+**初始化元数据库**
+
+- 登陆Mysql
+
+- 新建元数据库
+
+  - ```mysql
+    mysql> create database metastore;
+    mysql> quit;
+    ```
+
+- ==初始化Hive元数据库==
+
+  - ```sh
+    $ schematool -initSchema -dbType mysql -verbose
+    ```
+
+    
+
+
+
+##### 启动
+
+------
+
+- 启动Hive客户端
+
+  - ```sh
+    $bin/hive
+    ```
+
+- 查看数据库
+
+  - ```mysql
+    hive (default)> show databases;
+    OK
+    database_name
+    default
+    ```
+
+
+
+
+
+
+
+##### 修改元数据库字符集
+
+------
+
+> Hive元数据库的字符集默认为Latin1，由于其不支持中文字符，故若建表语句中包含中文注释，会出现乱码现象
+>
+
+**修改Hive元数据库中存储注释的字段的字符集为utf-8**
+
+- 字段注释
+
+  - ```mysql
+    mysql> alter table COLUMNS_V2 modify column COMMENT varchar(256) character set utf8;
+    ```
+
+- 表注释
+
+  - ```mysql
+    mysql> alter table TABLE_PARAMS modify column PARAM_VALUE mediumtext character set utf8;
+    ```
+
+- ==修改hive-site.xml中JDBC URL==
+
+  - ```xml
+    <property>
+            <name>javax.jdo.option.ConnectionURL</name>
+            <value>jdbc:mysql://hadoop102:3306/metastore?useSSL=false&amp;useUnicode=true&amp;characterEncoding=UTF-8</value>
+        </property>
+    ```
+
+    
+
+### 采集模块
+
+------
+
+> 数据的同步策略有**全量同步**和**增量同步**
+
+[^全量同步]: 每天都将业务数据库中的全部数据同步一份到数据仓库，这是保证两侧数据同步的最简单的方式
+[^增量同步]: 每天只将业务数据中的新增及变化数据同步到数据仓库。采用每日增量同步的表，通常需要在首日先进行一次全量同步
+
+
+
+**对比**
+
+| **同步策略** |            **优点**            |                           **缺点**                           |
+| :----------: | :----------------------------: | :----------------------------------------------------------: |
+| **全量同步** |            逻辑简单            | 在某些情况下效率较低。例如某张表数据量较大，但是每天数据的变化比例很低，若对其采用每日全量同步，则会重复同步和存储大量相同的数据。 |
+| **增量同步** | 效率高，无需同步和存储重复数据 | 逻辑复杂，需要将每日的新增及变化数据同原来的数据进行整合，才能使用 |
+
+==总结：大表全量，小表增量==
+
+
+
+**数据同步工具**
+
+------
+
+
+
+- DataX、Sqoop为代表的基于Select查询的离线、批量同步工具
+- Maxwell、Canal为代表的基于数据库数据变更日志的实时流式同步工具
+
+==对比==
+
+| **增量同步方案**   | **DataX/Sqoop**                                              | **Maxwell/Canal**                                            |
+| ------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| **对数据库的要求** | 原理是基于查询，故若想通过select查询获取新增及变化数据，就要求数据表中存在create_time、update_time等字段，然后根据这些字段获取变更数据。 | 要求数据库记录变更操作，例如MySQL需开启binlog。              |
+| **数据的中间状态** | 由于是离线批量同步，故若一条数据在一天中变化多次，该方案只能获取最后一个状态，中间状态无法获取。 | 由于是实时获取所有的数据变更操作，所以可以获取变更数据的所有中间状态。 |
+
+
+
+#### DataX
+
+[DataX](Notes\BigData\DataX\1、DataX\DataX.md)
+
+#### Maxwell
+
+[Maxwell](Notes\BigData\Maxwell\1、Maxwell\Maxwell.md)
+
+
+
+
+
+
+
+
+
+
+
 
 
 

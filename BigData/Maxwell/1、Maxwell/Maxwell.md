@@ -41,7 +41,7 @@
     [^文件名后缀为.inde]: 二进制日志索引文件
     [^文件名后缀为.00000*]: 记录数据库所有的 DDL 和 DML
 
-  - **分类 ：**STATEMENT,MIXED,ROW。
+  - **分类 ：**STATEMENT          MIXED               ROW。
 
     
 
