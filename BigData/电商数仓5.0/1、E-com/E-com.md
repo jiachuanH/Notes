@@ -1669,15 +1669,11 @@ esac
 
 #### DataX
 
-[DataX](https://github.com/jiachuanH/Notes/blob/main/BigData/DataX/1%E3%80%81DataX/DataX.md)
+[DataX](..\..\DataX\1、DataX\DataX.md)
 
 #### Maxwell
 
-[Maxwell](https://github.com/jiachuanH/Notes/blob/main/BigData/Maxwell/1%E3%80%81Maxwell/Maxwell.md)
-
-
-
-
+[Maxwell](..\..\Maxwell\1、Maxwell\Maxwell.md)
 
 
 
