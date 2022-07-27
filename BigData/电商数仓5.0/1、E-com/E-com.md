@@ -1446,7 +1446,7 @@ esac
 
 
 
-### 应用安装部署
+### 前置应用安装部署
 
 ------
 
@@ -2127,6 +2127,407 @@ esac
 
 ------
 
+> 增量表的同步 需要用Maxwell  导入到  Kafka  在使用Flume 导入到HDFS
+>
+
+​																					**流程图👇**
+
+
+
+![image-20220727222652397](../image/image-20220727222652397.png)
+
+
+
+##### 配置文件
+
+------
+
+###### ==Maxwell==
+
+- **修改config.properties配置文件并填入参数**
+
+  ```sh
+  $ vim /opt/module/maxwell/config.properties
+  
+  👇
+  
+  log_level=info
+  
+  producer=kafka
+  kafka.bootstrap.servers=hadoop102:9092,hadoop103:9092
+  
+  #kafka topic动态配置
+  kafka_topic=%{table}
+  # mysql login info
+  host=hadoop102
+  user=maxwell
+  password=maxwell
+  jdbc_options=useSSL=false&serverTimezone=Asia/Shanghai
+  
+  #表过滤，只同步特定的13张表
+  filter= include:gmall.cart_info,include:gmall.comment_info,include:gmall.coupon_use,include:gmall.favor_info,include:gmall.order_detail,include:gmall.order_detail_activity,include:gmall.order_detail_coupon,include:gmall.order_info,include:gmall.order_refund_info,include:gmall.order_status_log,include:gmall.payment_info,include:gmall.refund_payment,include:gmall.user_info
+  
+  ```
+
+- **测试**
+
+  - 重启maxwell
+
+    ```sh
+    $ mxw.sh restart
+    ```
+
+  - 启动ZK  KF   并启动  任意一个消费者
+
+    ```sh
+    $ bin/kafka-console-consumer.sh --bootstrap-server E-com102:9092 --topic cart_info
+    ```
+
+  - 生成模拟数据
+
+    ```sh
+    $ cd /opt/module/db_log/
+    $ java -jar gmall2020-mock-db-2021-11-14.jar 
+    ```
+
+  - 观察消费者
+
+
+
+###### ==Flume==
+
+> 将Kafka中各topic的数据传输到HDFS，故其需选用KafkaSource以及HDFSSink，Channe选用FileChanne
+
+​																							**配置重点**
+
+![image-20220727225015004](../image/image-20220727225015004.png)
+
+​																							**数据流图**
+
+![image-20220727225026667](../image/image-20220727225026667.png)
+
+
+
+
+
+- 在hadoop104节点的Flume的job目录下创建   kafka_to_hdfs_db.conf
+
+  并填入配置
+
+  ```sh
+  flume]$ vim job/kafka_to_hdfs_db.conf 
+  
+  
+  📃
+  
+  a1.sources = r1
+  a1.channels = c1
+  a1.sinks = k1
+  
+  a1.sources.r1.type = org.apache.flume.source.kafka.KafkaSource
+  a1.sources.r1.batchSize = 5000
+  a1.sources.r1.batchDurationMillis = 2000
+  a1.sources.r1.kafka.bootstrap.servers = hadoop102:9092,hadoop103:9092
+  a1.sources.r1.kafka.topics = cart_info,comment_info,coupon_use,favor_info,order_detail_activity,order_detail_coupon,order_detail,order_info,order_refund_info,order_status_log,payment_info,refund_payment,user_info
+  a1.sources.r1.kafka.consumer.group.id = flume
+  a1.sources.r1.setTopicHeader = true
+  a1.sources.r1.topicHeader = topic
+  a1.sources.r1.interceptors = i1
+  a1.sources.r1.interceptors.i1.type = com.atguigu.flume.interceptor.db.TimestampInterceptor$Builder
+  
+  
+  a1.channels.c1.type = file
+  a1.channels.c1.checkpointDir = /opt/module/flume/checkpoint/behavior2
+  a1.channels.c1.dataDirs = /opt/module/flume/data/behavior2/
+  a1.channels.c1.maxFileSize = 2146435071
+  a1.channels.c1.capacity = 1123456
+  a1.channels.c1.keep-alive = 6
+  
+  ## sink1
+  a1.sinks.k1.type = hdfs
+  a1.sinks.k1.hdfs.path = /origin_data/gmall/db/%{topic}_inc/%Y-%m-%d
+  a1.sinks.k1.hdfs.filePrefix = db
+  a1.sinks.k1.hdfs.round = false
+  
+  
+  a1.sinks.k1.hdfs.rollInterval = 10
+  a1.sinks.k1.hdfs.rollSize = 134217728
+  a1.sinks.k1.hdfs.rollCount = 0
+  
+  
+  a1.sinks.k1.hdfs.fileType = CompressedStream
+  a1.sinks.k1.hdfs.codeC = gzip
+  
+  ## 拼装
+  a1.sources.r1.channels = c1
+  a1.sinks.k1.channel= c1
+  
+  ```
+
+- **为了解决零点偏移问题需要配置拦截器**
+
+  [^零点偏移]: 比如2021-10-10 23:59:59生成的日志文件，然后数据经过第一层的 flume 采集，加上kafka的缓冲，然后到 集群的另一台上的第二层的flume的时候，时间肯定就会到2020-10-11 00:00:XX了，这样一来，如果采用当前系统时间作为timestamp的话，2020-10-10 的日志数据就会上传到hdfs上的2020-10-11 的目录下。因为Kafka Source会为其加上该header，value为当前系统的时间戳Kafka Source会为其加上该header，value为当前系统的时间戳
+  
+  新建maven配置pom.xml[^依托上面的配置]	[点我](####采集配置)
+  
+  在com.ryan.flume.interceptor.db包下创建TimestampInterceptor类
+  
+  ```java
+  package com.ryan.flume.interceptor.db;
+  
+  import com.alibaba.fastjson.JSONObject;
+  import org.apache.flume.Context;
+  import org.apache.flume.Event;
+  import org.apache.flume.interceptor.Interceptor;
+  
+  import java.nio.charset.StandardCharsets;
+  import java.util.List;
+  import java.util.Map;
+  
+  public class TimestampInterceptor implements Interceptor {
+      @Override
+      public void initialize() {
+  
+      }
+  
+      @Override
+      public Event intercept(Event event) {
+          // 1 获取数据
+          byte[] body = event.getBody();
+  
+          // 2 解析数据 设置格式
+          String log = new String(body, StandardCharsets.UTF_8);
+  
+          // 3 转换为JSON格式
+          JSONObject jsonObject = JSONObject.parseObject(log);
+  
+          // 4 拿到时间戳 并转换数据
+          Long ts = jsonObject.getLong("ts");
+          String time = String.valueOf(ts * 1000);
+  
+          // 5 拿到Map格式往里放数据
+          Map<String, String> headers = event.getHeaders();
+          headers.put("timestamp",time);
+  
+          return event;
+      }
+  
+      @Override
+      public List<Event> intercept(List<Event> events) {
+  
+          for (Event event : events) {
+              intercept(event);
+          }
+          return events;
+      }
+  
+      @Override
+      public void close() {
+  
+      }
+  
+  
+      public static class Builder implements Interceptor.Builder {
+          @Override
+          public Interceptor build() {
+              return new TimestampInterceptor();
+          }
+  
+          @Override
+          public void configure(Context context) {
+  
+          }
+      }
+  }
+  ```
+  
+  - 打包
+  
+  ![image-20220713163634637](../image/image-20220713163634637.png)
+  
+  - 上传至104 的     /opt/module/flume/lib文件夹下面
+
+
+
+
+
+- **测试**
+
+  - 启动zk  kf
+
+  - 启动104 的flume
+
+    ```sh
+    $ bin/flume-ng agent -n a1 -c conf/ -f job/kafka_to_hdfs_db.conf -Dflume.root.logger=info,console
+    ```
+
+  - 生成模拟数据
+
+    ```sh
+    db_log]$ java -jar gmall2020-mock-db-2021-11-14.jar 
+    ```
+
+  - 观察HDFS
+
+    [^HDFS路径日期为当前日期？]: 由于Maxwell输出的JSON字符串中的ts字段的值，是数据的变动日期。而真实场景下，数据的业务日期与变动日期应当是一致的
+    [^教学版Maxwell的mock_date]: 指定Maxwell输出JSON字符串的ts时间戳的日期
+
+    - 修改Maxwell配置文件config.properties，增加mock_date参数
+
+      ```properties
+      #该日期须和/opt/module/db_log/application.properties中的mock.date参数保持一致
+      mock_date=2020-06-14
+      ```
+
+    - 重启:    mxw.sh  restart
+
+    - 重新生成模拟数据  并观察HDFS路径是否正常
+
+
+
+##### Flume启停脚本
+
+- **102节点的/home/Ryan/bin目录下创建脚本f3.sh  并填入如下内容**
+
+  ```sh
+  $ vim f3.sh
+  
+  
+  📃
+  #!/bin/bash
+  
+  case $1 in
+  "start")
+          echo " --------启动 hadoop104 业务数据flume-------"
+          ssh hadoop104 "nohup /opt/module/flume/bin/flume-ng agent -n a1 -c /opt/module/flume/conf -f /opt/module/flume/job/kafka_to_hdfs_db.conf >/dev/null 2>&1 &"
+  ;;
+  "stop")
+  
+          echo " --------停止 hadoop104 业务数据flume-------"
+          ssh hadoop104 "ps -ef | grep kafka_to_hdfs_db.conf | grep -v grep |awk '{print \$2}' | xargs -n1 kill"
+  ;;
+  esac
+  
+  ```
+
+- **赋权 测试启动停止**
+
+
+
+
+
+##### 增量表的首日全量同步
+
+------
+
+> 增量表需要在首日进行一次全量同步，后续每日再进行增量同步 —— 首日全量同步可以使用Maxwell的bootstrap功能
+
+
+
+- **在~/bin目录创建mysql_to_kafka_inc_init.sh   并填入如下内容**
+
+  ```sh
+  $ vim mysql_to_kafka_inc_init.sh
+  
+  📃
+  #!/bin/bash
+  
+  # 该脚本的作用是初始化所有的增量表，只需执行一次
+  
+  MAXWELL_HOME=/opt/module/maxwell
+  
+  import_data() {
+      $MAXWELL_HOME/bin/maxwell-bootstrap --database gmall --table $1 --config $MAXWELL_HOME/config.properties
+  }
+  
+  case $1 in
+  "cart_info")
+    import_data cart_info
+    ;;
+  "comment_info")
+    import_data comment_info
+    ;;
+  "coupon_use")
+    import_data coupon_use
+    ;;
+  "favor_info")
+    import_data favor_info
+    ;;
+  "order_detail")
+    import_data order_detail
+    ;;
+  "order_detail_activity")
+    import_data order_detail_activity
+    ;;
+  "order_detail_coupon")
+    import_data order_detail_coupon
+    ;;
+  "order_info")
+    import_data order_info
+    ;;
+  "order_refund_info")
+    import_data order_refund_info
+    ;;
+  "order_status_log")
+    import_data order_status_log
+    ;;
+  "payment_info")
+    import_data payment_info
+    ;;
+  "refund_payment")
+    import_data refund_payment
+    ;;
+  "user_info")
+    import_data user_info
+    ;;
+  "all")
+    import_data cart_info
+    import_data comment_info
+    import_data coupon_use
+    import_data favor_info
+    import_data order_detail
+    import_data order_detail_activity
+    import_data order_detail_coupon
+    import_data order_info
+    import_data order_refund_info
+    import_data order_status_log
+    import_data payment_info
+    import_data refund_payment
+    import_data user_info
+    ;;
+  esac
+  
+  ```
+
+- **赋权  并将原本的增量表全部删除**
+
+- **测试**
+
+  ```sh
+  $ mysql_to_kafka_inc_init.sh all 
+  ```
+
+  
+
+
+
+# 三、总结
+
+
+
+## 用户行为日志采集
+
+![image-20220727232819196](../image/image-20220727232819196.png)
+
+
+
+**如何采集数据**
+
+- 只需要启动f1,kafka,f2即可  数据是动态监控本地磁盘文件的  如果生产数据  会被发送到对应的hdfs文件夹中
+
+- 首先启动所有的服务  之后调用lg.sh即可
+
+- 如果需要生产6月15号的数据  只需要修改application.yml文件中的参数  之后再执行lg.sh即可
 
 
 
@@ -2134,12 +2535,50 @@ esac
 
 
 
+## 业务数据采集
+
+### 15张全量表
+
+![image-20220727232734608](../image/image-20220727232734608.png)
 
 
 
 
 
+**同步数据:** 
 
+1. 使用gen_import_config.py脚本能传入库名和表名生产对应的json文件
+
+2. 使用gen_import_config.sh脚本一次性生成全部全量表的json文件
+(前面两步只需要操作一次  以后再使用都不需要重复操作)
+
+3. 使用同步数据脚本mysql_to_hdfs_full.sh  all 日期 
+(必须保证数据生产一天 导入一天的  不能一次性把数据全部生产)
+
+
+
+
+
+### 13张增量表
+
+> 项目中使用的是教学版的maxwell,能够手动控制json中的时间,如果是原版只能是当前的时间,需要手动改成06-14
+
+
+
+![image-20220727232742284](../image/image-20220727232742284.png)
+
+
+
+**同步数据:** 
+
+0. 启动maxwell ,启动f3,启动kafka
+1. 首日同步  使用maxwell-bootstrap功能  直接用脚本
+mysql_to_kafka_inc_init.sh all   不能填写日期  因为日期在maxwell的配置文件中写死了
+
+2. 每日同步 
+(1) .修改maxwell的配置文件  将日期修改为06-15  之后重启maxwell
+(2) .修改application.properties文件  将日期修改为06-15 同时将重置内容设置为0 不再重置  之后调用
+java -jar gmall2020-mock-db-2021-11-14.jar  生产数据  maxwell会自动监控 完成同步
 
 
 
