@@ -87,13 +87,18 @@ Mainly about JAVA and big data study notes
     	<ul><li><a href="BigData\Spark\1、SparkNote\3、SparkSteaming.md">3、SparkSteaming</a></li></ul>
     </ul>
     <ul><li><a href="">Flink未学</a></li></ul>
-    <ul><li><a href="BigData\电商数仓5.0\1、E-com\E-com.md">E-commerce5.0</a></li></ul>
+    <ul><li>电商数仓5.0</li>
+        <ul><li><a href="BigData\电商数仓5.0\1、E-com\E-com上.md">E-com上</a></li></ul>
+        <ul><li><a href="BigData\电商数仓5.0\1、E-com\E-com中.md">E-com中</a></li></ul>
+        <ul><li><a href="BigData\电商数仓5.0\1、E-com\E-com下.md">E-com下</a></li></ul>
+    </ul>
 </details>
 <details>
     <summary><strong>Java</strong></summary>
     <p style="color: red;" align="center">以下笔记均为PDF文档由B站UP主<a href="https://space.bilibili.com/95256449?spm_id_from=333.337.search-card.all.click">狂神说</a>所有 </p>
     <ul><li><a href="Java\">点我至目录页</a></li></ul>
 </details>
+
 
 
 

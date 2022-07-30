@@ -40,13 +40,13 @@ CLI（command-line interface）、JDBC/ODBC(jdbc访问hive)、WEBUI（浏览器�
 
 **4**）驱动器：Driver
 
-（1）解析器（SQL Parser）：将SQL字符串转换成抽象语法树AST，这一步一般都用第三方工具库完成，比如antlr；对AST进行语法分析，比如表是否存在、字段是否存在、SQL语义是否有误。
+（1）解析器（SQL Parser）：将SQL字符串转换成抽象语法树AST，这一步一般都用第三方工具库完成，比如antlr；对AST进行语法分析，比如==表是否存在、字段是否存在、SQL语义是否有误。==
 
-（2）编译器（Physical Plan）：将AST编译生成逻辑执行计划。
+（2）编译器（Physical Plan）：将AST编译==生成逻辑执行计划。==
 
-（3）优化器（Query Optimizer）：对逻辑执行计划进行优化。
+（3）优化器（Query Optimizer）：对逻辑执行计划进行==优化。==
 
-（4）执行器（Execution）：把逻辑执行计划转换成可以运行的物理计划。对于Hive来说，就是MR/Spark。
+（4）执行器（Execution）：把逻辑执行计划==转换==成可以运行的物理计划。对于Hive来说，就是MR/Spark。
 
 
 
@@ -58,15 +58,16 @@ CLI（command-line interface）、JDBC/ODBC(jdbc访问hive)、WEBUI（浏览器�
 
 **👍**
 
-（1）操作接口采用类SQL语法，提供快速开发的能力（简单、容易上手）。
+- 操作接口采用==类SQL语法==，提供快速开发的能力（简单、容易上手）。
 
-（2）避免了去写MapReduce，**减少开发人员的学习成本。**
+- 避免了去写MapReduce，**减少开发人员的学习成本。**
 
-（3）Hive的执行延迟比较高，因此Hive常用于数据分析，对实时性要求不高的场合。
+- Hive的执行延迟比较高，因此Hive常用于数据分析，对实时性要求不高的场合。
 
-（4）Hive优势在于处理大数据，对于处理小数据没有优势，因为Hive的执行延迟比较高。
+- Hive优势在于处理大数据，对于处理小数据没有优势，因为Hive的执行延迟比较高。
 
-（5）Hive支持用户自定义函数，用户可以根据自己的需求来实现自己的函数。
+- Hive支持用户自定义函数，用户可以根据自己的需求来实现自己的函数。
+
 
 
 
@@ -309,70 +310,128 @@ export PATH JAVA_HOME HADOOP_HOME HIVE_HOME
 
 
 
-## 启动Hive
+## 初始化元数据库
 
 ```sh
-1）登陆MySQL
+#登陆MySQL
 [atguigu@hadoop102 software]$ mysql -uroot -p000000
-2）新建Hive元数据库
+
+#新建Hive元数据库
 mysql> create database metastore;
 mysql> quit;
-3）初始化Hive元数据库📌
-[atguigu@hadoop102 software]$ schematool -initSchema -dbType mysql -verbose
 
+#初始化Hive元数据库📌
+[atguigu@hadoop102 software]$ schematool -initSchema -dbType mysql -verbose
 ```
 
-**⚙配置元数据服务和JDBC访问服务**
-
-~~~xml
-🍀使用元数据服务的方式访问Hive
-1）在hive-site.xml文件中添加如下配置信息
-    <!-- 指定存储元数据要连接的地址 -->
-    <property>
-        <name>hive.metastore.uris</name>
-        <value>thrift://hadoop102:9083</value>
-    </property>
-2）启动metastore
-[atguigu@hadoop202 hive]$ hive --service metastore
-2020-04-24 16:58:08: Starting Hive Metastore Server
-注意: 启动后窗口不能再操作，需打开一个新的shell窗口做别的操作
-
-🍀使用JDBC方式访问Hive
-1）在hive-site.xml文件中添加如下配置信息
-    <!-- 指定hiveserver2连接的host -->
-    <property>
-        <name>hive.server2.thrift.bind.host</name>
-        <value>hadoop102</value>
-    </property>
-
-    <!-- 指定hiveserver2连接的端口号 -->
-    <property>
-        <name>hive.server2.thrift.port</name>
-        <value>10000</value>
-    </property>
-2）启动hiveserver2
-[atguigu@hadoop102 hive]$ bin/hive --service hiveserver2
-
-3）启动beeline客户端（需要多等待一会）
-[atguigu@hadoop102 hive]$ bin/beeline -u jdbc:hive2://hadoop102:10000 -n atguigu
-
-4）看到如下界面
-Connecting to jdbc:hive2://hadoop102:10000
-Connected to: Apache Hive (version 3.1.2)
-Driver: Hive JDBC (version 3.1.2)
-Transaction isolation: TRANSACTION_REPEATABLE_READ
-Beeline version 3.1.2 by Apache Hive
-0: jdbc:hive2://hadoop102:10000>
-
-~~~
 
 
+
+
+## 启动的三种方式Hive
+
+> 根据连接方式将Hive的其中分为三种
+
+
+
+**仅限本地连接**
+
+- ```sh
+  $bin/hive
+  ```
+
+  ==该方式直接命令启动即可不需要启动额外的服务==
+
+**外部访问连接**
+
+- 2、元数据服务的方式访问Hive
+- 3、JDBC方式访问Hive
+
+
+
+### 外部访问连接
+
+------
+
+#### 元数据服务的方式
+
+------
+
+​																								**原理图⚙**
+
+![image-20220730134816762](../image/image-20220730134816762.png)
+
+- **在hive-site.xml文件中添加如下配置信息**
+
+  ```xml
+  <!-- 指定存储元数据要连接的地址 -->
+      <property>
+          <name>hive.metastore.uris</name>
+          <value>thrift://hadoop102:9083</value>
+      </property>
+  ```
+
+- **启动metastore Server**
+
+  ```sh
+  $ hive --service metastore
+  ```
+
+- ==启动HIve==
+
+  ```sh
+  hive]$ bin/hive
+  ```
+
+  
+
+
+
+
+
+#### JDBC方式
+
+------
+
+​																							**原理图⚙**
+
+![image-20220730135439814](../image/image-20220730135439814.png)
+
+- **在hive-site.xml文件中添加如下配置信息**
+
+  ```xml
+  <!-- 指定hiveserver2连接的host -->
+      <property>
+          <name>hive.server2.thrift.bind.host</name>
+          <value>hadoop102</value>
+      </property>
+  
+      <!-- 指定hiveserver2连接的端口号 -->
+      <property>
+          <name>hive.server2.thrift.port</name>
+          <value>10000</value>
+      </property>
+  ```
+
+- **启动hiveserver2**
+
+  ```sh
+  $ bin/hive --service hiveserver2
+  ```
+
+- **启动beeline客户端**                ==启动后多等待==
+
+  ```sh
+  $ bin/beeline -u jdbc:hive2://hadoop102:10000 -n atguigu
+  ```
+
+  
 
 ==Beeline/HS2连接报错==：Could not open client transport with JDBC Uri: jdbc:hive2://localhost:10000/default
 
-**主要原因**是hadoop引入了一个安全伪装机制，使得hadoop 不允许上层系统直接将实际用户传递到hadoop层，而是将实际用户传递给一个超级代理，由此代理在hadoop上执行操作，避免任意客户端随意操作hadoop
+**主要原因：**是hadoop引入了一个安全伪装机制，使得hadoop 不允许上层系统直接将实际用户传递到hadoop层，而是将实际用户传递给一个超级代理，由此代理在hadoop上执行操作，避免任意客户端随意操作hadoop
 
-**解决方式：**在hadoop的配置文件core-site.xml增加如下配置，重启hdfs，其中“xxx”是连接beeline的用户，将“xxx”替换成自己的用户名即可。最关键的是一定要重启hadoop，先`stop-all.sh`，再`start-all.sh`，否则不会生效的！！那样就还是报错！
+**解决方式：**在hadoop的配置文件core-site.xml增加如下配置，重启hdfs，其中“xxx”是连接beeline的用户，将“xxx”替换成自己的用户名即可。最关键的是==一定要重启hadoop==，先`stop-all.sh`，再`start-all.sh`，否则不会生效的！！那样就还是报错！
 
 
 
@@ -390,31 +449,6 @@ Beeline version 3.1.2 by Apache Hive
 **“\*”表示可通过超级代理“xxx”操作hadoop的用户、用户组和主机**
 
  
-
-**🔥启动Hive**
-
-**先启动元数据服务和JDBC访问服务**
-
-**🚩别忘了启动Hadoop集群**
-
-~~~sh
-#1）启动Hive
-
-[atguigu@hadoop102 hive]$ bin/hive
-
-#2）使用Hive
-hive> show databases;
-hive> show tables;
-hive> create table test (id int);
-hive> insert into test values(1);
-hive> select * from test;
-
-#3）开启另一个窗口测试开启hive
-[atguigu@hadoop102 hive]$ bin/hive
-
-~~~
-
-
 
 
 
@@ -539,9 +573,9 @@ esac
 
 
 
+## HIve基操
 
-
-##  Hive常用交互命令
+###  Hive常用交互命令
 
 
 
@@ -565,7 +599,7 @@ select *from student;
 
 
 
-## Hive其他命令操作
+### Hive其他命令操作
 
 ~~~sh
 #1）退出hive窗口：
@@ -587,13 +621,9 @@ hive(default)>dfs -ls /;
 
 
 
-## Hive常见属性配置
+### Hive常见属性配置
 
-
-
-
-
-### hive窗口打印默认库和表头
+#### hive窗口打印默认库和表头
 
 ~~~xml
 在hive-site.xml中加入如下两个配置: 
@@ -613,7 +643,7 @@ hive(default)>dfs -ls /;
 
    <!--打印 当前库 和 表头 -->
 
-### Hive运行日志信息配置
+#### Hive运行日志信息配置
 
 
 
@@ -637,7 +667,7 @@ property.hive.log.dir=/opt/module/hive/logs
 
 
 
-### 参数配置方式
+#### 参数配置方式
 
 
 
@@ -880,7 +910,7 @@ with dbproperties("createtime"="2021-04-24");
 
 
 
-==数据库在HDFS上的默认存储路径是/user/hive/warehouse/\*.db==
+​		==数据库在HDFS上的默认存储路径是/user/hive/warehouse/\*.db==
 
 
 
@@ -2098,7 +2128,7 @@ alter table dept_partition add partition(day='20200405') partition(day='20200406
 
 /*删分区:*/
 alter table dept_partition drop partition(day='20200404');	/*单个*/	
-alter table dept_partition drop partition(day='20200405') , partition(day='20200406');	/*多个分区别忘加逗号*/ 			 👆
+alter table dept_partition drop partition(day='20200405') , partition(day='20200406');	/*多个分区别忘加逗号*/ 			 										  👆
 ~~~
 
 
@@ -2550,15 +2580,18 @@ group by t1.c_b
 
 ### 列转行
 
+------
 
 
-**相关函数**
-      `explode()`: 将数组或者map拆分成多行
-      `LATERAL VIEW` : 侧写表(虚拟表)
 
-**用法：**`LATERAL VIEW udtf(expression) tableAlias AS columnAlias`
+- **相关函数**
+        `explode()`: 将数组或者map拆分成多行
+        `LATERAL VIEW` : 侧写表(虚拟表)
 
-**解释**：用于和split, explode等UDTF一起使用，它能够将一列数据拆成多行数据，**在此基础上可以对拆分后的数据进行聚合。**
+- **用法：**`LATERAL VIEW udtf(expression) tableAlias AS columnAlias`
+
+- **解释**：用于和split, explode等UDTF一起使用，它能够将一列数据拆成多行数据，**在此基础上可以对拆分后的数据进行聚合。**
+
 
 
 
